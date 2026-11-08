@@ -1,45 +1,39 @@
 # PIPLAY
 
-Una pantalla de escritorio que reutiliza una Raspberry Pi para reproducir videos cortos en bucle aleatorio. Desde un navegador en la misma red se administra la biblioteca, se programa cuándo se ve la imagen y se activa AirPlay a demanda.
+PIPLAY turns a Raspberry Pi and a small LCD into a **desktop video player and AirPlay receiver**. I built it to leave short clips playing on my desk and switch to screen mirroring whenever I wanted to show something from my iPhone or iPad.
 
-**Versión del repositorio · v1.0.0**
+**Version v1.0.0**
 
-Primera publicación del código, con asistente inicial y panel bilingüe.
+## What PIPLAY does
+
+- **Play local video.** PIPLAY reads MP4 files from the microSD card and plays them directly on the attached LCD. It shuffles the library by default. From the dashboard, you can play a specific clip, loop it, queue it, or skip to the next one.
+- **Receive AirPlay.** Turn on AirPlay in the dashboard, select PIPLAY from Screen Mirroring on your Apple device, and enter the displayed PIN. PIPLAY pauses local playback while AirPlay is active and resumes it when you turn AirPlay off.
+
+## Web dashboard
+
+Use a browser on the same Wi-Fi network to manage the video library, upload MP4s, and switch between local playback and AirPlay. The dashboard also lets you schedule the display by day and time, check microSD space, and change the device name, language, and schedule time zone.
+
+English is the default, with Spanish available in setup, sign-in, and settings. On the LCD used for this build, turning the display off stops playback and blanks the image. The backlight stays on, and the Pi remains reachable over Wi-Fi.
 
 ## Hardware
 
-- Raspberry Pi 3 Model B Rev 1.2, identificada en el equipo por el sistema.
-- LCD SPI de 3,5 pulgadas, 480 × 320, con controlador `fb_ili9486` y framebuffer `/dev/fb1`.
-- microSD para el sistema y la biblioteca MP4. Conexión Wi-Fi para acceder al panel en el puerto 8080.
+- Raspberry Pi 3 Model B Rev 1.2.
+- 3.5-inch, 480 × 320 SPI LCD with the `fb_ili9486` driver and `/dev/fb1` framebuffer.
+- microSD for the OS and MP4 library, plus Wi-Fi for the dashboard on port 8080.
 
-## Qué hace
+## How it works
 
-- Ofrece inglés por defecto y permite cambiar a español en el asistente, el ingreso y el menú de ajustes del panel.
-- El asistente pide un nombre, un usuario web y una contraseña. El nombre se puede cambiar después en el panel y se usa en AirPlay y en la pantalla de arranque. El hostname del sistema se administra por separado.
+`app/player.py` sends local video to the framebuffer with FFmpeg and runs UxPlay for AirPlay. `app/display.py` stores and applies the display schedule. `app/panel.py` serves the dashboard and talks to the player over a Unix socket. The player and dashboard run as separate systemd services.
 
-- Reproduce MP4 mediante FFmpeg y mezcla la cola evitando repetir el último video al volver a barajar. El panel permite reproducir, repetir, poner en cola o saltar videos.
-- Sube archivos al elegirlos, muestra el progreso y comprueba el nombre y el espacio disponible. La biblioteca incluye miniaturas, descarga y papelera.
-- Enciende o pone en negro la pantalla a demanda o según días y horarios. El apagado detiene la reproducción y cierra AirPlay. La Pi queda accesible por Wi-Fi y la retroiluminación permanece encendida con este hardware.
-- Activa y desactiva UxPlay desde el panel. El PIN aparece cuando AirPlay está activo.
-- Muestra el espacio libre de la microSD y organiza la carga, los horarios y la biblioteca en secciones plegables.
+## Set up another Raspberry Pi
 
-El botón de engranaje abre los ajustes de idioma, nombre, zona horaria y vista inicial de la biblioteca. También muestra la dirección del panel y el nombre de red.
+The example units assume a Linux account named `admin` and an LCD already working at `/dev/fb1`. Install Python 3.9 or later, FFmpeg with fbdev output, and DejaVu Sans. For AirPlay, install UxPlay with GStreamer and the fbdev sink.
 
-## Cómo está hecho
+1. Create `/home/admin/desk-screen/videos`, make it writable by `admin`, and add your MP4 files.
+2. Install the files in `app/` as root-owned files in `/opt/desk-screen-panel/`. Copy the units in `systemd/` to `/etc/systemd/system/`.
+3. Create `/etc/desk-screen-panel.conf` with `LAN_CIDR=192.168.1.0/24`, adjusted for your network. Optionally set `LOCAL_NAME=rpi3.local` if that name resolves on your network.
+4. Generate a setup code with `sudo sh -c 'umask 077; openssl rand -hex 16 > /etc/desk-screen-setup.code'`.
+5. Run `sudo systemctl daemon-reload` and `sudo systemctl enable --now desk-screen.service desk-screen-panel.service`. Open the Pi’s local IP address on port 8080.
+6. Read the setup code with `sudo cat /etc/desk-screen-setup.code`. In the wizard, enter the code and choose a device name, web username, and password of at least 12 characters. The code can only complete setup once. Keep the file so systemd can load the example unit.
 
-`app/player.py` controla la reproducción, la salida al framebuffer y UxPlay. `app/display.py` guarda y aplica los horarios en la zona horaria elegida para el panel, con la de la Raspberry como valor predeterminado. `app/panel.py` sirve el dashboard y se comunica con el reproductor por un socket Unix. Los dos procesos corren como servicios de systemd.
-
-## Preparar otra Raspberry
-
-Las unidades de ejemplo suponen una cuenta local `admin`, un LCD que ya funciona en `/dev/fb1` y las rutas originales del proyecto. Configurá el controlador de tu LCD antes de iniciar los servicios. Se necesita Python 3.9 o posterior, FFmpeg con salida fbdev, DejaVu Sans y, para AirPlay, UxPlay con GStreamer y fbdevsink.
-
-1. Creá `/home/admin/desk-screen/videos` con acceso de escritura para `admin` y copiá los MP4 que quieras reproducir.
-2. Instalá los archivos de `app/` como archivos de root en `/opt/desk-screen-panel/` y las dos unidades de `systemd/` en `/etc/systemd/system/`.
-3. Creá `/etc/desk-screen-panel.conf` con `LAN_CIDR=192.168.1.0/24` ajustado a tu red. Opcionalmente agregá `LOCAL_NAME=rpi3.local` si el nombre resuelve en tu red.
-4. Generá el código de instalación en la Pi con `sudo sh -c 'umask 077; openssl rand -hex 16 > /etc/desk-screen-setup.code'`.
-5. Ejecutá `sudo systemctl daemon-reload` y `sudo systemctl enable --now desk-screen.service desk-screen-panel.service`. Abrí la IP local de la Pi en el puerto 8080.
-6. Consultá el código con `sudo cat /etc/desk-screen-setup.code`. Ingresalo en el asistente y elegí el idioma, el nombre, el usuario web y una contraseña de al menos 12 caracteres. Después de guardar, el código deja de habilitar el asistente. Conservá el archivo para que systemd pueda cargar la unidad de ejemplo.
-
-El panel usa HTTP en la LAN. Completá el asistente desde una red de confianza. Las unidades son ejemplos de instalación y las rutas deben ajustarse si usás otra cuenta o pantalla. El usuario del asistente es una cuenta web, separada de la cuenta de Linux.
-
-Para conservar un ingreso anterior al actualizar manualmente una instalación existente, el panel sigue admitiendo la configuración `TOKEN_FILE` con el usuario web `admin`. Aplicá los archivos y unidades de manera coordinada.
+The dashboard uses HTTP on the LAN. Complete setup on a trusted network. The web account is separate from the Linux account. For manual upgrades, the panel still supports an existing `TOKEN_FILE` with the web username `admin`.
