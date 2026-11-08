@@ -1,0 +1,15 @@
+[Unit]
+Description=JAVITEN PI3 player
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 /opt/desk-screen-panel/player.py
+Restart=always
+RestartSec=5
+RuntimeDirectory=desk-screen-control
+RuntimeDirectoryMode=0755
+StateDirectory=desk-screen-display
+
+[Install]
+WantedBy=multi-user.target

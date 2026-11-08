@@ -1,0 +1,28 @@
+[Unit]
+Description=JAVITEN PI3 local web panel
+Wants=network-online.target
+After=network-online.target desk-screen.service
+
+[Service]
+User=admin
+Environment=VIDEO_DIR=/home/admin/desk-screen/videos
+Environment=BIND_IP=0.0.0.0
+EnvironmentFile=/etc/desk-screen-panel.conf
+Environment=TOKEN_FILE=%d/desk-screen-panel.token
+LoadCredential=desk-screen-panel.token:/etc/desk-screen-panel.token
+ExecStart=/usr/bin/python3 /opt/desk-screen-panel/panel.py
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/admin/desk-screen/videos
+PrivateTmp=yes
+PrivateDevices=yes
+RestrictAddressFamilies=AF_INET AF_UNIX
+TasksMax=48
+UMask=0077
+Nice=5
+
+[Install]
+WantedBy=multi-user.target
