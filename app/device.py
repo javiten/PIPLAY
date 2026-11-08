@@ -9,7 +9,7 @@ import stat
 import tempfile
 
 STATE = Path(os.environ.get('DESK_SCREEN_CONFIG', '/var/lib/desk-screen-panel/device.json'))
-DEFAULT_NAME = 'Desk Screen'
+DEFAULT_NAME = 'PIPLAY'
 LANGUAGES = ('en', 'es')
 
 

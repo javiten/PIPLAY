@@ -1,4 +1,4 @@
-# JAVITEN PI3 · Desk Screen
+# PIPLAY
 
 Una pantalla de escritorio que reutiliza una Raspberry Pi para reproducir videos cortos en bucle aleatorio. Desde un navegador en la misma red se administra la biblioteca, se programa cuándo se ve la imagen y se activa AirPlay a demanda.
 

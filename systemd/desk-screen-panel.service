@@ -1,5 +1,5 @@
 [Unit]
-Description=JAVITEN PI3 local web panel
+Description=PIPLAY local web panel
 Wants=network-online.target
 After=network-online.target desk-screen.service
 

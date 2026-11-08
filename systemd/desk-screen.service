@@ -1,5 +1,5 @@
 [Unit]
-Description=JAVITEN PI3 player
+Description=PIPLAY player
 
 [Service]
 Type=simple
