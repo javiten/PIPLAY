@@ -9,6 +9,14 @@ PIPLAY turns a Raspberry Pi and a small LCD into a **desktop video player and Ai
 - **Play local video.** PIPLAY reads MP4 files from the microSD card and plays them directly on the attached LCD. It shuffles the library by default. From the dashboard, you can play a specific clip, loop it, queue it, or skip to the next one.
 - **Receive AirPlay.** Turn on AirPlay in the dashboard, select PIPLAY from Screen Mirroring on your Apple device, and enter the displayed PIN. PIPLAY pauses local playback while AirPlay is active and resumes it when you turn AirPlay off.
 
+## Screenshots
+
+The PIPLAY dashboard with sample videos and an example display schedule.
+
+![PIPLAY dashboard with playback controls and video library](docs/screenshots/dashboard.png)
+
+![PIPLAY display schedule with weekday and time controls](docs/screenshots/schedule.png)
+
 ## Web dashboard
 
 Use a browser on the same Wi-Fi network to manage the video library, upload MP4s, and switch between local playback and AirPlay. The dashboard also lets you schedule the display by day and time, check microSD space, and change the device name, language, and schedule time zone.
