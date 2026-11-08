@@ -14,7 +14,7 @@ Primera publicación del código, con asistente inicial y panel bilingüe.
 
 ## Qué hace
 
-- Ofrece inglés por defecto y permite cambiar a español en el asistente, el ingreso y el panel.
+- Ofrece inglés por defecto y permite cambiar a español en el asistente, el ingreso y el menú de ajustes del panel.
 - El asistente pide un nombre, un usuario web y una contraseña. El nombre se puede cambiar después en el panel y se usa en AirPlay y en la pantalla de arranque. El hostname del sistema se administra por separado.
 
 - Reproduce MP4 mediante FFmpeg y mezcla la cola evitando repetir el último video al volver a barajar. El panel permite reproducir, repetir, poner en cola o saltar videos.
@@ -23,9 +23,11 @@ Primera publicación del código, con asistente inicial y panel bilingüe.
 - Activa y desactiva UxPlay desde el panel. El PIN aparece cuando AirPlay está activo.
 - Muestra el espacio libre de la microSD y organiza la carga, los horarios y la biblioteca en secciones plegables.
 
+El botón de engranaje abre los ajustes de idioma, nombre, zona horaria y vista inicial de la biblioteca. También muestra la dirección del panel y el nombre de red.
+
 ## Cómo está hecho
 
-`app/player.py` controla la reproducción, la salida al framebuffer y UxPlay. `app/display.py` guarda y aplica los horarios en la zona horaria del sistema. `app/panel.py` sirve el dashboard y se comunica con el reproductor por un socket Unix. Los dos procesos corren como servicios de systemd.
+`app/player.py` controla la reproducción, la salida al framebuffer y UxPlay. `app/display.py` guarda y aplica los horarios en la zona horaria elegida para el panel, con la de la Raspberry como valor predeterminado. `app/panel.py` sirve el dashboard y se comunica con el reproductor por un socket Unix. Los dos procesos corren como servicios de systemd.
 
 ## Preparar otra Raspberry
 

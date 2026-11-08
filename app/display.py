@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 import subprocess
 import time
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 class Display:
@@ -15,7 +15,15 @@ class Display:
         if zone is None:
             with open('/etc/localtime', 'rb') as source:
                 zone = ZoneInfo.from_file(source)
-        self.zone = zone
+        self.system_zone = self.zone = zone
+        self.system_zone_name = zone.key or str(zone)
+        if not zone.key:
+            localtime = Path('/etc/localtime').resolve().as_posix()
+            if '/zoneinfo/' in localtime:
+                self.system_zone_name = localtime.split('/zoneinfo/', 1)[1]
+            elif Path('/etc/timezone').exists():
+                self.system_zone_name = Path('/etc/timezone').read_text().strip()
+        self.zone_name = self.system_zone_name
         self.config = dict(enabled=False, on='08:00', off='23:00', manual=True, until=None, days=list(range(7)))
         self.error = None
         self.applied = None
@@ -84,9 +92,15 @@ class Display:
             self.error = 'No se pudo cambiar la TFT: ' + str(exc)
             self.retry = now + 30
 
+    def set_timezone(self, name):
+        try:
+            self.zone = ZoneInfo(name) if name else self.system_zone
+        except (ZoneInfoNotFoundError, ValueError, TypeError):
+            self.zone = self.system_zone
+        self.zone_name = self.zone.key or self.system_zone_name
+
     def status(self):
-        return dict(self.config, power=self.applied, error=self.error,
-                    timezone=Path('/etc/timezone').read_text().strip() if Path('/etc/timezone').exists() else str(self.zone))
+        return dict(self.config, power=self.applied, error=self.error, timezone=self.zone_name)
 
     def command(self, request):
         now = time.time()

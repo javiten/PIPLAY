@@ -56,16 +56,48 @@ button.secondary[aria-pressed="true"]{background:#8ae7ba;color:#0e261b}
 .icon-toggle[aria-pressed="true"]{border-color:#8ae7ba;background:#203c32!important}
 .icon-toggle svg{width:24px;height:24px}
 .top-tools{flex-wrap:wrap;justify-content:flex-end}nav a{color:#8ae7ba;font-size:.8rem}
+.settings{position:relative;margin:0;border-radius:10px}
+.settings summary{list-style:none;display:grid;place-items:center;width:38px;height:36px;padding:0;color:#8ae7ba}
+.settings summary::-webkit-details-marker{display:none}
+.settings summary svg{width:22px;height:22px}
+.settings[open]>summary{border-bottom:0;background:#203c32;border-radius:9px}
+.settings-body{position:absolute;right:0;top:calc(100% + 8px);width:min(340px,calc(100vw - 80px));max-height:calc(100dvh - 76px);overflow:auto;padding:16px;background:#192527;border:1px solid #526864;border-radius:14px;box-shadow:0 12px 28px #0008}
+.settings-body h2{font-size:1.15rem}
+.settings-body label{display:grid;gap:4px;font-size:.9rem}
+.settings-body input:not([type=checkbox]),.settings-body select{width:100%;min-width:0;padding:8px;background:#101719;color:#eef7f4;border:1px solid #526864;border-radius:8px;font:inherit}
+.settings-body .settings-check{display:flex;align-items:center;gap:6px}
+.settings-body dl{margin:14px 0 0;font-size:.8rem;overflow-wrap:anywhere}
+.settings-body dt{color:#b3c7c1}
+.settings-body dd{margin:0 0 6px}
+@media(max-width:480px){.settings-body{position:fixed;top:54px;right:12px;width:min(340px,calc(100vw - 24px))}}
 </style>
 <main>
 <header class="topbar">
 <div class="tag">{{RASPBERRY PI · RED LOCAL}}</div>
-<div class="top-tools"><nav aria-label="{{Idioma}}"><a href="/?lang=en" lang="en">English</a> · <a href="/?lang=es" lang="es">Español</a></nav>
+<div class="top-tools">
 <details class="storage"><summary>microSD · <strong id="available">—</strong> {{libres}}</summary>
 <div class="storage-body"><small>Total <strong id="total">—</strong></small>
 <progress id="disk" max="100" value="0" aria-label="{{Espacio ocupado}}"></progress>
 <button id="cleanup" type="button" class="secondary">{{Limpiar subidas incompletas}}</button>
 <small id="cleanup-status" role="status"></small></div></details>
+<details id="settings" class="settings" __SETTINGS_OPEN__>
+<summary aria-label="{{Ajustes del dispositivo}}" title="{{Ajustes del dispositivo}}">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="m9 3-.5 2.5-2 1-2.3-.8-2 3.5 1.8 1.8v2l-1.8 1.8 2 3.5 2.3-.8 2 1 .5 2.5h6l.5-2.5 2-1 2.3.8 2-3.5-1.8-1.8v-2l1.8-1.8-2-3.5-2.3.8-2-1L15 3z"/><circle cx="12" cy="12" r="3"/></svg>
+</summary>
+<div class="settings-body">
+<h2>{{Ajustes del dispositivo}}</h2>
+<!-- ERROR -->
+<form method="post" action="/settings">
+<label>{{Idioma}}<select name="language"><option value="en" __LANG_EN__>English</option><option value="es" __LANG_ES__>Español</option></select></label>
+<label>{{Nombre del dispositivo}}<input id="device-name" name="name" value="__DEVICE_NAME__" required maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9 _\-]{0,31}"></label>
+<small>{{AirPlay usa el nombre nuevo la próxima vez que lo actives.}}</small>
+<label>{{Zona horaria}}<select name="timezone">__TIMEZONES__</select></label>
+<small>{{Se aplica a los horarios de pantalla.}}</small>
+<label class="settings-check"><input type="checkbox" name="library_open" __LIBRARY_CHECKED__> {{Abrir la biblioteca al cargar el panel}}</label>
+<button>{{Guardar ajustes}}</button>
+</form>
+<dl><dt>{{Nombre de red}}</dt><dd>__NETWORK_NAME__</dd><dt>{{Dirección del panel}}</dt><dd>__PANEL_ADDRESS__</dd></dl>
+</div></details>
 <button id="logout" class="secondary">{{Salir}}</button>
 </div></header>
 <div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="16" fill="#0a1510" stroke="#40765d" stroke-width="2"/><path d="M15 16h34v28H15z M25 50h14 M32 44v6" fill="none" stroke="#8ae7ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="m28 23 12 7-12 7z" fill="#8ae7ba"/></svg><h1>__DEVICE_NAME__</h1></div>
@@ -94,16 +126,9 @@ button.secondary[aria-pressed="true"]{background:#8ae7ba;color:#0e261b}
 <form id="upload"><input id="file" type="file" accept=".mp4,video/mp4" hidden><button>{{Subir a la biblioteca}}</button><progress id="progress" max="100" value="0" hidden aria-label="{{Progreso de subida}}"></progress></form>
 <p id="msg" role="status"></p>
 </div></details>
-<details open><summary>{{Biblioteca de videos}}</summary><div class="details-body">
+<details __LIBRARY_OPEN__><summary>{{Biblioteca de videos}}</summary><div class="details-body">
 <p id="free"></p><ul id="files"></ul>
 </div></details>
-<details><summary>{{Ajustes del dispositivo}}</summary><div class="details-body">
-<!-- ERROR -->
-<form method="post" action="/device">
-<label for="device-name">{{Nombre del dispositivo}}</label>
-<input id="device-name" name="name" value="__DEVICE_NAME__" required maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9 _\-]{0,31}">
-<button>{{Guardar nombre}}</button>
-</form></div></details>
 </main>
 <script>
 const q = id => document.getElementById(id);

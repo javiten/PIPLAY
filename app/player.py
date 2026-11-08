@@ -70,6 +70,8 @@ def available(path):
 class Player:
     def __init__(self):
         self.display = Display(self.apply_display)
+        self.settings_check = 0
+        self.schedule_timezone = None
         self.process = None
         self.airplay = None
         self.airplay_pin = None
@@ -109,10 +111,16 @@ class Player:
              '-frames:v', '1', '-f', 'fbdev', str(FB)], timeout=2, check=True)
 
     def tick(self):
+        now = time.monotonic()
+        if now >= self.settings_check:
+            self.settings_check = now + 2
+            timezone = (device_config() or {}).get('timezone', '')
+            if timezone != self.schedule_timezone:
+                self.schedule_timezone = timezone
+                self.display.set_timezone(timezone)
         self.display.tick()
         if not self.display.desired(time.time()):
             return
-        now = time.monotonic()
         if self.airplay is not None:
             if self.airplay.poll() is None:
                 return

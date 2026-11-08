@@ -22,6 +22,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import device
 from language import translate, render
+from zoneinfo import available_timezones
+
+TIMEZONES = sorted(available_timezones())
 
 PORT = 8080
 RESERVE = 512 * 1024**2
@@ -210,6 +213,25 @@ class Handler(BaseHTTPRequestHandler):
         body = render(template, language)
         body = body.replace('<!-- ERROR -->', f'<p class="error" role="alert">{html.escape(translate(error, language))}</p>' if error else '')
         body = body.replace('__DEVICE_NAME__', html.escape(label))
+        if template == PAGE:
+            config = CONFIG or {}
+            zone = config.get('timezone', '')
+            options = ['<option value=""' + (' selected' if not zone else '') + '>'
+                       + translate('Usar zona de la Raspberry', language) + '</option>']
+            options.extend(f'<option{" selected" if value == zone else ""}>{html.escape(value)}</option>'
+                           for value in TIMEZONES)
+            replacements = {
+                '__TIMEZONES__': ''.join(options),
+                '__LANG_EN__': 'selected' if language == 'en' else '',
+                '__LANG_ES__': 'selected' if language == 'es' else '',
+                '__LIBRARY_OPEN__': 'open' if config.get('library_open', True) else '',
+                '__LIBRARY_CHECKED__': 'checked' if config.get('library_open', True) else '',
+                '__NETWORK_NAME__': html.escape(LOCAL_NAME or socket.gethostname()),
+                '__PANEL_ADDRESS__': html.escape(self.host),
+                '__SETTINGS_OPEN__': 'open' if error else '',
+            }
+            for key, value in replacements.items():
+                body = body.replace(key, value)
         self.reply(status, body, 'text/html')
 
     def login_page(self, status=200, error=''):
@@ -222,7 +244,8 @@ class Handler(BaseHTTPRequestHandler):
                 or not 0 < int(lengths[0]) <= limit
                 or self.headers.get_content_type() != 'application/x-www-form-urlencoded'):
             return None
-        fields = urllib.parse.parse_qs(self.rfile.read(int(lengths[0])).decode('utf-8', errors='replace'))
+        fields = urllib.parse.parse_qs(self.rfile.read(int(lengths[0])).decode('utf-8', errors='replace'),
+                                      keep_blank_values=True)
         return {key: values[0] for key, values in fields.items() if len(values) == 1}
 
     def first_run(self):
@@ -259,22 +282,31 @@ class Handler(BaseHTTPRequestHandler):
             CONFIG = config
         self.reply(303, location='/')
 
-    def rename_device(self):
+    def save_settings(self):
         global CONFIG
-        fields = self.form()
-        label = (fields or {}).get('name', '').strip()
+        fields = self.form() or {}
+        label = fields.get('name', '').strip()
+        language, zone = fields.get('language'), fields.get('timezone')
         if not device.valid_name(label):
             self.page(PAGE, 400, 'Nombre de dispositivo inválido.')
             return
+        if language not in device.LANGUAGES or (zone != '' and zone not in TIMEZONES):
+            self.page(PAGE, 400, 'Elegí un idioma y una zona horaria válidos.')
+            return
         with AUTH_LOCK:
-            config = {**(CONFIG or {}), 'name': label}
+            config = {**(CONFIG or {}), 'name': label, 'language': language, 'timezone': zone,
+                      'library_open': fields.get('library_open') == 'on'}
             try:
                 device.save(config)
             except OSError:
                 self.page(PAGE, 500, 'No se pudo guardar la configuración.')
                 return
             CONFIG = config
-        self.reply(303, location='/')
+        self.reply(303, cookie=self.language_cookie(language), location='/')
+
+    @staticmethod
+    def language_cookie(language):
+        return f'desk_language={language}; Path=/; SameSite=Strict; Max-Age=31536000'
 
     def valid_login(self, user, password):
         if CONFIG and 'password_hash' in CONFIG:
@@ -314,7 +346,7 @@ class Handler(BaseHTTPRequestHandler):
         if not self.local():
             return
         if self.path in ('/?lang=en', '/?lang=es'):
-            self.reply(303, cookie=f'desk_language={self.path[-2:]}; Path=/; SameSite=Strict; Max-Age=31536000', location='/')
+            self.reply(303, cookie=self.language_cookie(self.path[-2:]), location='/')
             return
         if self.path == '/':
             if not CONFIG and not PASSWORD:
@@ -419,8 +451,8 @@ class Handler(BaseHTTPRequestHandler):
         if not key:
             self.reply(401, 'Ingresá para continuar.')
             return
-        if self.path == '/device':
-            self.rename_device()
+        if self.path == '/settings':
+            self.save_settings()
             return
         if self.headers.get_all('X-Desk-Screen') != ['1']:
             self.reply(403, 'Solicitud inválida.')
