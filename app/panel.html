@@ -70,16 +70,30 @@ button.secondary[aria-pressed="true"]{background:#8ae7ba;color:#0e261b}
 .settings-body dt{color:#b3c7c1}
 .settings-body dd{margin:0 0 6px}
 @media(max-width:480px){.settings-body{position:fixed;top:54px;right:12px;width:min(340px,calc(100vw - 24px))}}
+main{padding-top:16px}
+.brand{min-width:0;gap:8px}
+.brand h1{font-size:clamp(1.2rem,3vw,1.65rem);line-height:1.15;margin:0;overflow-wrap:anywhere}
+.brand svg{width:36px}
+.top-tools{flex:0 0 auto;flex-wrap:nowrap;gap:6px}
+.top-tools .icon-toggle,.settings summary{width:38px;height:38px;padding:0;border-radius:10px}
+.top-tools .icon-toggle svg,.settings summary svg{width:21px;height:21px}
+.settings{border-color:#40765d;background:#0a1510}
+.now{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:4px}
+.now-actions{grid-column:2;grid-row:1 / span 2;justify-self:end;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+#playback-mode{grid-column:1}
+#player-error{grid-column:1 / -1}
+.storage{position:static;margin-top:16px;white-space:normal;border-radius:18px}
+.storage summary{padding:16px 20px;font-size:inherit}
+.storage[open]>summary{border-bottom:1px solid #354744}
+.storage-body{position:static;width:auto;background:none;border:0;border-radius:0;justify-items:start}
+.storage-body #disk{max-width:320px}
+@media(max-width:360px){.brand svg{display:none}.now-actions button{padding:9px 10px}}
 </style>
 <main>
 <header class="topbar">
-<div class="tag">{{RASPBERRY PI · RED LOCAL}}</div>
+<div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="16" fill="#0a1510" stroke="#40765d" stroke-width="2"/><path d="M15 16h34v28H15z M25 50h14 M32 44v6" fill="none" stroke="#8ae7ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="m28 23 12 7-12 7z" fill="#8ae7ba"/></svg><h1>__DEVICE_NAME__</h1></div>
 <div class="top-tools">
-<details class="storage"><summary>microSD · <strong id="available">—</strong> {{libres}}</summary>
-<div class="storage-body"><small>Total <strong id="total">—</strong></small>
-<progress id="disk" max="100" value="0" aria-label="{{Espacio ocupado}}"></progress>
-<button id="cleanup" type="button" class="secondary">{{Limpiar subidas incompletas}}</button>
-<small id="cleanup-status" role="status"></small></div></details>
+<button id="screen-toggle" type="button" class="secondary icon-toggle" aria-label="{{Pantalla}}" title="{{Pantalla}}" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9M7 6a8 8 0 1 0 10 0"/></svg></button>
 <details id="settings" class="settings" __SETTINGS_OPEN__>
 <summary aria-label="{{Ajustes del dispositivo}}" title="{{Ajustes del dispositivo}}">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="m9 3-.5 2.5-2 1-2.3-.8-2 3.5 1.8 1.8v2l-1.8 1.8 2 3.5 2.3-.8 2 1 .5 2.5h6l.5-2.5 2-1 2.3.8 2-3.5-1.8-1.8v-2l1.8-1.8-2-3.5-2.3.8-2-1L15 3z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -98,18 +112,14 @@ button.secondary[aria-pressed="true"]{background:#8ae7ba;color:#0e261b}
 </form>
 <dl><dt>{{Nombre de red}}</dt><dd>__NETWORK_NAME__</dd><dt>{{Dirección del panel}}</dt><dd>__PANEL_ADDRESS__</dd></dl>
 </div></details>
-<button id="logout" class="secondary">{{Salir}}</button>
+<button id="airplay" type="button" class="secondary icon-toggle" aria-label="AirPlay" title="AirPlay" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17H3V4h18v13h-2"/><path d="m12 14 6 7H6z" fill="currentColor" stroke="none"/></svg></button>
+<button id="logout" type="button" class="secondary icon-toggle" aria-label="{{Salir}}" title="{{Salir}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h6m3-13 5 5-5 5m5-5H9"/></svg></button>
 </div></header>
-<div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="16" fill="#0a1510" stroke="#40765d" stroke-width="2"/><path d="M15 16h34v28H15z M25 50h14 M32 44v6" fill="none" stroke="#8ae7ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="m28 23 12 7-12 7z" fill="#8ae7ba"/></svg><h1>__DEVICE_NAME__</h1></div>
-<p>{{Control de pantalla y biblioteca de videos.}}</p>
+<small id="screen-message" role="status"></small>
 <section class="now" aria-labelledby="now-title">
 <div><h2 id="now-title">{{Ahora en pantalla}}</h2><p id="current">{{Consultando…}}</p></div>
-<p id="playback-mode"></p><div><button id="next" type="button">{{Siguiente}}</button> <button id="random" type="button" class="secondary" hidden>{{Volver al azar}}</button></div>
-<div class="screen-actions">
-<button id="screen-toggle" type="button" class="secondary icon-toggle" aria-label="{{Pantalla}}" title="{{Pantalla}}" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9M7 6a8 8 0 1 0 10 0"/></svg></button>
-<button id="airplay" type="button" class="secondary icon-toggle" aria-label="AirPlay" title="AirPlay" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17H3V4h18v13h-2"/><path d="m12 14 6 7H6z" fill="currentColor" stroke="none"/></svg></button>
-</div>
-<small id="screen-message" role="status"></small>
+<p id="playback-mode"></p>
+<div class="now-actions"><button id="random" type="button" class="secondary" hidden>{{Volver al azar}}</button> <button id="next" type="button">{{Siguiente}}</button></div>
 <small id="player-error" role="status" hidden></small>
 </section>
 <details><summary>{{Horarios de pantalla}}</summary><div class="details-body">
@@ -126,6 +136,11 @@ button.secondary[aria-pressed="true"]{background:#8ae7ba;color:#0e261b}
 <form id="upload"><input id="file" type="file" accept=".mp4,video/mp4" hidden><button>{{Subir a la biblioteca}}</button><progress id="progress" max="100" value="0" hidden aria-label="{{Progreso de subida}}"></progress></form>
 <p id="msg" role="status"></p>
 </div></details>
+<details class="storage"><summary>microSD · <strong id="available">—</strong> {{libres}}</summary>
+<div class="details-body storage-body"><small>Total <strong id="total">—</strong></small>
+<progress id="disk" max="100" value="0" aria-label="{{Espacio ocupado}}"></progress>
+<button id="cleanup" type="button" class="secondary">{{Limpiar subidas incompletas}}</button>
+<small id="cleanup-status" role="status"></small></div></details>
 <details __LIBRARY_OPEN__><summary>{{Biblioteca de videos}}</summary><div class="details-body">
 <p id="free"></p><ul id="files"></ul>
 </div></details>
