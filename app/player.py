@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import grp
 from display import Display
+import device
+from language import translate
 import ipaddress
 import pwd
 import secrets
@@ -34,13 +36,22 @@ def local_ip():
     return None
 
 
+def device_config():
+    try:
+        return device.load()
+    except (OSError, ValueError):
+        return None
+
+
 def show_rescue(address):
+    config = device_config()
+    language = (config or {}).get("language", "en")
     def line(text, y, size, color):
         return (f'drawtext=fontfile={FONT}:text={text}:fontsize={size}:'
                 f'fontcolor={color}:x=(w-tw)/2:y={y}')
-    filters = ','.join((line('JAVITEN PI3', 52, 26, '0x8ae7ba'),
-                        line(address or 'Conectando...', 129, 39, 'white'),
-                        line('Panel web / Puerto 8080', 218, 21, '0x8ae7ba'),
+    filters = ','.join((line(device.name(config), 52, 26, '0x8ae7ba'),
+                        line(address or translate('Conectando...', language), 129, 39, 'white'),
+                        line(translate('Panel web / Puerto 8080', language), 218, 21, '0x8ae7ba'),
                         'format=rgb565le'))
     try:
         subprocess.run(
@@ -186,7 +197,7 @@ class Player:
         account = pwd.getpwnam('admin')
         try:
             self.airplay = subprocess.Popen(
-                ['/usr/bin/uxplay', '-n', 'JAVITEN PI3', '-nh', '-pin', pin,
+                ['/usr/bin/uxplay', '-n', device.name(device_config()), '-nh', '-pin', pin,
                  '-s', '480x320', '-fps', '20', '-avdec', '-as', '0',
                  '-vs', 'videoscale add-borders=true ! video/x-raw,width=480,height=320,pixel-aspect-ratio=1/1 ! videoconvert ! video/x-raw,format=RGB16 ! fbdevsink device=/dev/fb1'],
                 stdin=subprocess.DEVNULL, user=account.pw_uid, group=account.pw_gid,

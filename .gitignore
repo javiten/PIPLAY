@@ -4,3 +4,5 @@ __pycache__/
 *.MP4
 *.token
 .env
+*.code
+device.json

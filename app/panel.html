@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="es">
+<html lang="__LANGUAGE__">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JAVITEN PI3 · Biblioteca</title>
+<title>__DEVICE_NAME__ · {{Biblioteca}}</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#101719;color:#eef7f4;font:16px system-ui,sans-serif}main{max-width:760px;margin:auto;padding:36px 18px}h1{font-size:clamp(2.4rem,8vw,4rem);margin:6px 0}h2{margin:0 0 14px}.tag{color:#8ae7ba;letter-spacing:.17em;font-size:.8rem;font-weight:700}p,small{color:#b3c7c1}section{background:#192527;border:1px solid #354744;border-radius:18px;padding:20px;margin-top:20px}form{display:grid;gap:12px}input,button{font:inherit;max-width:100%}button{border:0;border-radius:10px;background:#8ae7ba;color:#0e261b;padding:12px 16px;font-weight:700;cursor:pointer}button:disabled{opacity:.5}button.secondary{background:#303e3e;color:#f6e1db}progress{width:100%;accent-color:#8ae7ba}ul{padding:0;margin:0;list-style:none}li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #354744}li div{min-width:0;overflow-wrap:anywhere}li button{flex-shrink:0}#msg{min-height:1.5em;margin-bottom:0}#free{margin-top:0}
 .brand{display:flex;align-items:center;gap:12px}.brand svg{width:58px;flex-shrink:0}.stats{display:flex;gap:24px;flex-wrap:wrap;margin:12px 0}.stats div{display:grid;gap:4px}.stats strong{font-size:1.4rem}.logout{float:right}input::file-selector-button{background:#303e3e;color:#eef7f4;border:0;border-radius:7px;padding:8px;margin-right:8px}
@@ -55,52 +55,60 @@ button.secondary[aria-pressed="true"]{background:#8ae7ba;color:#0e261b}
 .icon-toggle{width:48px;height:48px;display:inline-grid;place-items:center;padding:0;border:2px solid #40765d;background:#0a1510!important;color:#8ae7ba!important;border-radius:14px}
 .icon-toggle[aria-pressed="true"]{border-color:#8ae7ba;background:#203c32!important}
 .icon-toggle svg{width:24px;height:24px}
+.top-tools{flex-wrap:wrap;justify-content:flex-end}nav a{color:#8ae7ba;font-size:.8rem}
 </style>
 <main>
 <header class="topbar">
-<div class="tag">RASPBERRY PI · RED LOCAL</div>
-<div class="top-tools">
-<details class="storage"><summary>microSD · <strong id="available">—</strong> libres</summary>
+<div class="tag">{{RASPBERRY PI · RED LOCAL}}</div>
+<div class="top-tools"><nav aria-label="{{Idioma}}"><a href="/?lang=en" lang="en">English</a> · <a href="/?lang=es" lang="es">Español</a></nav>
+<details class="storage"><summary>microSD · <strong id="available">—</strong> {{libres}}</summary>
 <div class="storage-body"><small>Total <strong id="total">—</strong></small>
-<progress id="disk" max="100" value="0" aria-label="Espacio ocupado"></progress>
-<button id="cleanup" type="button" class="secondary">Limpiar subidas incompletas</button>
+<progress id="disk" max="100" value="0" aria-label="{{Espacio ocupado}}"></progress>
+<button id="cleanup" type="button" class="secondary">{{Limpiar subidas incompletas}}</button>
 <small id="cleanup-status" role="status"></small></div></details>
-<button id="logout" class="secondary">Salir</button>
+<button id="logout" class="secondary">{{Salir}}</button>
 </div></header>
-<div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="16" fill="#0a1510" stroke="#40765d" stroke-width="2"/><path d="M15 16h34v28H15z M25 50h14 M32 44v6" fill="none" stroke="#8ae7ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="m28 23 12 7-12 7z" fill="#8ae7ba"/></svg><h1>JAVITEN PI3</h1></div>
-<p>Control de pantalla y biblioteca de videos.</p>
+<div class="brand"><svg viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="60" height="60" rx="16" fill="#0a1510" stroke="#40765d" stroke-width="2"/><path d="M15 16h34v28H15z M25 50h14 M32 44v6" fill="none" stroke="#8ae7ba" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="m28 23 12 7-12 7z" fill="#8ae7ba"/></svg><h1>__DEVICE_NAME__</h1></div>
+<p>{{Control de pantalla y biblioteca de videos.}}</p>
 <section class="now" aria-labelledby="now-title">
-<div><h2 id="now-title">Ahora en pantalla</h2><p id="current">Consultando…</p></div>
-<p id="playback-mode"></p><div><button id="next" type="button">Siguiente</button> <button id="random" type="button" class="secondary" hidden>Volver al azar</button></div>
+<div><h2 id="now-title">{{Ahora en pantalla}}</h2><p id="current">{{Consultando…}}</p></div>
+<p id="playback-mode"></p><div><button id="next" type="button">{{Siguiente}}</button> <button id="random" type="button" class="secondary" hidden>{{Volver al azar}}</button></div>
 <div class="screen-actions">
-<button id="screen-toggle" type="button" class="secondary icon-toggle" aria-label="Pantalla" title="Pantalla" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9M7 6a8 8 0 1 0 10 0"/></svg></button>
+<button id="screen-toggle" type="button" class="secondary icon-toggle" aria-label="{{Pantalla}}" title="{{Pantalla}}" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9M7 6a8 8 0 1 0 10 0"/></svg></button>
 <button id="airplay" type="button" class="secondary icon-toggle" aria-label="AirPlay" title="AirPlay" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17H3V4h18v13h-2"/><path d="m12 14 6 7H6z" fill="currentColor" stroke="none"/></svg></button>
 </div>
 <small id="screen-message" role="status"></small>
 <small id="player-error" role="status" hidden></small>
 </section>
-<details><summary>Horarios de pantalla</summary><div class="details-body">
+<details><summary>{{Horarios de pantalla}}</summary><div class="details-body">
 <form id="screen-schedule">
-<label><input id="screen-enabled" type="checkbox"> Activar horario</label>
-<div class="schedule-times"><label>Encender a las <input id="screen-start" type="time" value="08:00" required></label>
-<label>Apagar a las <input id="screen-end" type="time" value="23:00" required></label></div>
-<fieldset id="screen-days"><legend>Días de encendido</legend><label><input type="checkbox" value="0" checked> Lun</label> <label><input type="checkbox" value="1" checked> Mar</label> <label><input type="checkbox" value="2" checked> Mié</label> <label><input type="checkbox" value="3" checked> Jue</label> <label><input type="checkbox" value="4" checked> Vie</label> <label><input type="checkbox" value="5" checked> Sáb</label> <label><input type="checkbox" value="6" checked> Dom</label></fieldset>
+<label><input id="screen-enabled" type="checkbox"> {{Activar horario}}</label>
+<div class="schedule-times"><label>{{Encender a las}} <input id="screen-start" type="time" value="08:00" required></label>
+<label>{{Apagar a las}} <input id="screen-end" type="time" value="23:00" required></label></div>
+<fieldset id="screen-days"><legend>{{Días de encendido}}</legend><label><input type="checkbox" value="0" checked> {{Lun}}</label> <label><input type="checkbox" value="1" checked> {{Mar}}</label> <label><input type="checkbox" value="2" checked> {{Mié}}</label> <label><input type="checkbox" value="3" checked> {{Jue}}</label> <label><input type="checkbox" value="4" checked> {{Vie}}</label> <label><input type="checkbox" value="5" checked> {{Sáb}}</label> <label><input type="checkbox" value="6" checked> {{Dom}}</label></fieldset>
 <small id="screen-zone"></small>
-<button>Guardar horarios</button>
+<button>{{Guardar horarios}}</button>
 </form><p id="schedule-message" role="status"></p>
 </div></details>
-<details><summary>Subir video</summary><div class="details-body">
-<form id="upload"><input id="file" type="file" accept=".mp4,video/mp4" hidden><button>Subir a la biblioteca</button><progress id="progress" max="100" value="0" hidden aria-label="Progreso de subida"></progress></form>
+<details><summary>{{Subir video}}</summary><div class="details-body">
+<form id="upload"><input id="file" type="file" accept=".mp4,video/mp4" hidden><button>{{Subir a la biblioteca}}</button><progress id="progress" max="100" value="0" hidden aria-label="{{Progreso de subida}}"></progress></form>
 <p id="msg" role="status"></p>
 </div></details>
-<details open><summary>Biblioteca de videos</summary><div class="details-body">
+<details open><summary>{{Biblioteca de videos}}</summary><div class="details-body">
 <p id="free"></p><ul id="files"></ul>
 </div></details>
+<details><summary>{{Ajustes del dispositivo}}</summary><div class="details-body">
+<!-- ERROR -->
+<form method="post" action="/device">
+<label for="device-name">{{Nombre del dispositivo}}</label>
+<input id="device-name" name="name" value="__DEVICE_NAME__" required maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9 _\-]{0,31}">
+<button>{{Guardar nombre}}</button>
+</form></div></details>
 </main>
 <script>
 const q = id => document.getElementById(id);
 const files = q('files'), msg = q('msg'), bar = q('progress');
-const fmt = n => (n / 1048576).toLocaleString('es', {maximumFractionDigits:1}) + ' MiB';
+const fmt = n => (n / 1048576).toLocaleString(document.documentElement.lang, {maximumFractionDigits:1}) + ' MiB';
 let busy = false;
 function lock(value) {
   busy = value;
@@ -111,7 +119,7 @@ async function refresh() {
   if (r.status === 401) { location.reload(); return; }
   if (!r.ok) throw Error(await r.text());
   const data = await r.json();
-  const gib = n => (n / 1073741824).toLocaleString('es', {maximumFractionDigits:2}) + ' GiB';
+  const gib = n => (n / 1073741824).toLocaleString(document.documentElement.lang, {maximumFractionDigits:2}) + ' GiB';
   q('total').textContent = gib(data.total);
   q('available').textContent = gib(data.free);
   q('disk').value = 100 * (1 - data.free / data.total);
@@ -120,7 +128,7 @@ async function refresh() {
   if (!data.files.length) {
     const li = document.createElement('li');
     li.className = 'empty';
-    li.textContent = 'Todavía no hay videos.';
+    li.textContent = '{{Todavía no hay videos.}}';
     files.append(li);
   }
   for (const f of data.files) {
@@ -129,40 +137,40 @@ async function refresh() {
     label.className = 'card-label';
     label.textContent = f.name; size.textContent = fmt(f.size);
     label.append(document.createElement('br'), size);
-    btn.className = 'secondary'; btn.textContent = 'Quitar'; btn.disabled = busy;
-    btn.setAttribute('aria-label', 'Quitar ' + f.name);
+    btn.className = 'secondary'; btn.textContent = '{{Quitar}}'; btn.disabled = busy;
+    btn.setAttribute('aria-label', '{{Quitar }}' + f.name);
     btn.onclick = async () => {
-      if (busy || !confirm('¿Mover a la papelera «' + f.name + '»?')) return;
+      if (busy || !confirm('{{¿Mover a la papelera «}}' + f.name + '{{»?}}')) return;
       lock(true);
       try {
         const r = await fetch('/api/delete?name=' + encodeURIComponent(f.name),
           {method:'POST', headers:{'X-Desk-Screen':'1'}, body:''});
         msg.textContent = await r.text();
         await refresh();
-      } catch (e) { msg.textContent = 'No se pudo confirmar el cambio. Recargá la página.'; }
+      } catch (e) { msg.textContent = '{{No se pudo confirmar el cambio. Recargá la página.}}'; }
       finally { lock(false); }
     };
     const actions = document.createElement('div');
     actions.className = 'actions';
     const download = document.createElement('a');
     download.className = 'download';
-    download.textContent = 'Descargar';
-    download.setAttribute('aria-label', 'Descargar ' + f.name);
+    download.textContent = '{{Descargar}}';
+    download.setAttribute('aria-label', '{{Descargar }}' + f.name);
     download.href = '/api/download?name=' + encodeURIComponent(f.name);
     download.download = f.name;
     const play = document.createElement('button');
     play.className = 'play';
-    play.textContent = 'Reproducir ahora';
+    play.textContent = '{{Reproducir ahora}}';
     play.disabled = busy || controlling;
-    play.setAttribute('aria-label', 'Reproducir ahora ' + f.name);
+    play.setAttribute('aria-label', '{{Reproducir ahora }}' + f.name);
     play.onclick = () => control('play?name=' + encodeURIComponent(f.name));
     const loop = document.createElement('button');
     loop.className = 'secondary';
-    loop.textContent = 'Dejar en loop';
+    loop.textContent = '{{Dejar en loop}}';
     loop.onclick = () => control('loop?name=' + encodeURIComponent(f.name));
     const queue = document.createElement('button');
     queue.className = 'secondary';
-    queue.textContent = 'Reproducir después';
+    queue.textContent = '{{Reproducir después}}';
     queue.onclick = () => control('queue?name=' + encodeURIComponent(f.name));
     actions.append(play, queue, loop, download, btn);
     const thumb = document.createElement('div');
@@ -184,7 +192,7 @@ q('cleanup').onclick = async () => {
   if (busy) return;
   lock(true);
   const message = q('cleanup-status');
-  message.textContent = 'Limpiando…';
+  message.textContent = '{{Limpiando…}}';
   try {
     const r = await fetch('/api/storage/cleanup', {method:'POST',
       headers:{'X-Desk-Screen':'1'}, body:''});
@@ -192,11 +200,11 @@ q('cleanup').onclick = async () => {
     if (!r.ok) throw Error(await r.text());
     const result = await r.json();
     message.textContent = result.count
-      ? 'Archivos eliminados: ' + result.count + ' · Liberados: ' + fmt(result.freed)
-      : 'No hay subidas incompletas.';
+      ? '{{Archivos eliminados: }}' + result.count + '{{ · Liberados: }}' + fmt(result.freed)
+      : '{{No hay subidas incompletas.}}';
     await refresh();
   } catch (e) {
-    message.textContent = e.message || 'No se pudo completar la limpieza.';
+    message.textContent = e.message || '{{No se pudo completar la limpieza.}}';
   } finally {
     lock(false);
   }
@@ -206,17 +214,17 @@ q('upload').onsubmit = e => {
   if (busy) return;
   const picker = q('file');
   picker.value = '';
-  msg.textContent = 'Elegí un archivo MP4.';
+  msg.textContent = '{{Elegí un archivo MP4.}}';
   picker.click();
 };
 q('file').onchange = async () => {
   if (busy) return;
   const f = q('file').files[0];
   if (!f || !/\.mp4$/i.test(f.name) || !f.size) {
-    msg.textContent = 'Elegí un archivo MP4.'; return;
+    msg.textContent = '{{Elegí un archivo MP4.}}'; return;
   }
   lock(true);
-  msg.textContent = 'Verificando archivo…';
+  msg.textContent = '{{Verificando archivo…}}';
   const name = encodeURIComponent(f.name);
   try {
     const check = await fetch('/api/upload/check?name=' + name + '&size=' + f.size,
@@ -224,20 +232,20 @@ q('file').onchange = async () => {
     if (check.status === 401) { location.reload(); return; }
     if (!check.ok) throw Error(await check.text());
   } catch (error) {
-    msg.textContent = error instanceof TypeError ? 'No se pudo contactar a la Raspberry.' : error.message;
+    msg.textContent = error instanceof TypeError ? '{{No se pudo contactar a la Raspberry.}}' : error.message;
     lock(false);
     return;
   }
   bar.value = 0; bar.hidden = false;
-  msg.textContent = 'Subiendo ' + f.name + '…';
+  msg.textContent = '{{Subiendo }}' + f.name + '…';
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/api/upload?name=' + encodeURIComponent(f.name));
   xhr.setRequestHeader('X-Desk-Screen', '1');
   xhr.upload.onprogress = ev => { if (ev.lengthComputable) bar.value = 100 * ev.loaded / ev.total; };
   xhr.onload = async () => {
-    msg.textContent = xhr.responseText || 'La Pi devolvió un error.';
+    msg.textContent = xhr.responseText || '{{La Pi devolvió un error.}}';
     if (xhr.status === 201) q('file').value = '';
-    try { await refresh(); } catch (e) { msg.textContent += ' Recargá para actualizar la biblioteca.'; }
+    try { await refresh(); } catch (e) { msg.textContent += '{{ Recargá para actualizar la biblioteca.}}'; }
     finally { lock(false); bar.hidden = true; }
   };
   xhr.onerror = async () => {
@@ -245,10 +253,10 @@ q('file').onchange = async () => {
       const r = await fetch('/api/upload/check?name=' + name + '&size=' + f.size,
         {method:'POST', headers:{'X-Desk-Screen':'1'}, body:''});
       if (r.status === 401) { location.reload(); return; }
-      msg.textContent = r.ok ? 'La transferencia se interrumpió. Volvé a elegir el video para reintentar.' : await r.text();
+      msg.textContent = r.ok ? '{{La transferencia se interrumpió. Volvé a elegir el video para reintentar.}}' : await r.text();
       await refresh();
     } catch {
-      msg.textContent = 'Se perdió la conexión con la Raspberry durante la subida.';
+      msg.textContent = '{{Se perdió la conexión con la Raspberry durante la subida.}}';
     }
     lock(false); bar.hidden = true;
   };
@@ -258,8 +266,8 @@ q('logout').onclick = async () => {
   try {
     const r = await fetch('/logout', {method:'POST', headers:{'X-Desk-Screen':'1'}, body:''});
     if (r.ok || r.status === 401) location.reload();
-    else msg.textContent = 'No se pudo cerrar la sesión.';
-  } catch { msg.textContent = 'No se pudo cerrar la sesión.'; }
+    else msg.textContent = '{{No se pudo cerrar la sesión.}}';
+  } catch { msg.textContent = '{{No se pudo cerrar la sesión.}}'; }
 };
 let controlling = false;
 let statusVersion = 0;
@@ -270,7 +278,7 @@ function showScreen(screen) {
   if (!screen) return;
   screenPower = screen.power;
   const toggle = q('screen-toggle');
-  toggle.title = screenPower ? 'Apagar pantalla' : 'Encender pantalla';
+  toggle.title = screenPower ? '{{Apagar pantalla}}' : '{{Encender pantalla}}';
   toggle.setAttribute('aria-pressed', String(screenPower === true));
   q('screen-zone').textContent = screen.timezone;
   if (!screenLoaded) {
@@ -291,7 +299,7 @@ async function screenControl(action, fields) {
     if (r.status === 401) { location.reload(); return; }
     if (!r.ok) throw Error(await r.text());
     showScreen((await r.json()).screen);
-    feedback.textContent = fields ? 'Horarios guardados.' : 'Control aplicado.';
+    feedback.textContent = fields ? '{{Horarios guardados.}}' : '{{Control aplicado.}}';
   } catch (e) { feedback.textContent = e.message; }
   finally { controlling = false; }
 }
@@ -308,15 +316,15 @@ function showPlayback(data) {
   q('airplay').setAttribute('aria-pressed', String(airplayActive));
   q('next').hidden = airplayActive;
   if (airplayActive) {
-    q('current').textContent = 'AirPlay · JAVITEN PI3';
-    q('playback-mode').textContent = 'Abrí Duplicar pantalla en el iPhone · PIN ' + data.pin;
+    q('current').textContent = 'AirPlay · ' + q('device-name').defaultValue;
+    q('playback-mode').textContent = '{{Abrí Duplicar pantalla en el iPhone · PIN }}' + data.pin;
     q('random').hidden = true;
     return;
   }
-  q('current').textContent = data.current || 'Esperando el próximo video…';
+  q('current').textContent = data.current || '{{Esperando el próximo video…}}';
   const details = [];
-  if (data.loop) details.push('En loop: ' + data.loop);
-  if (data.queued) details.push('Después: ' + data.queued);
+  if (data.loop) details.push('{{En loop: }}' + data.loop);
+  if (data.queued) details.push('{{Después: }}' + data.queued);
   q('playback-mode').textContent = details.join(' · ');
   q('random').hidden = !details.length;
 }
@@ -329,7 +337,7 @@ async function updatePlayback() {
     const data = await r.json();
     if (version === statusVersion) showPlayback(data);
   } catch {
-    if (version === statusVersion) q('current').textContent = 'Estado no disponible';
+    if (version === statusVersion) q('current').textContent = '{{Estado no disponible}}';
   }
 }
 async function control(action) {
@@ -344,7 +352,7 @@ async function control(action) {
     if (!r.ok) throw Error(await r.text());
     showPlayback(await r.json());
   } catch (e) {
-    error.textContent = e.message || 'No se pudo controlar el reproductor.';
+    error.textContent = e.message || '{{No se pudo controlar el reproductor.}}';
     error.hidden = false;
   } finally {
     controlling = false;
@@ -356,5 +364,5 @@ q('next').onclick = () => control('next');
 setInterval(updatePlayback, 3000);
 document.addEventListener('visibilitychange', updatePlayback);
 updatePlayback();
-refresh().catch(() => { msg.textContent = 'No se pudo cargar la biblioteca. Recargá la página.'; });
+refresh().catch(() => { msg.textContent = '{{No se pudo cargar la biblioteca. Recargá la página.}}'; });
 </script>

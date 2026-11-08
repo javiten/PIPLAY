@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import hashlib
 import hmac
+import html
 import ipaddress
 import json
 import os
@@ -19,6 +20,9 @@ import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+import device
+from language import translate, render
+
 PORT = 8080
 RESERVE = 512 * 1024**2
 VIDEOS = Path(os.environ['VIDEO_DIR'])
@@ -28,7 +32,13 @@ PRIVATE = tuple(map(ipaddress.IPv4Network, ('10.0.0.0/8', '172.16.0.0/12', '192.
 if (not ADDR.is_unspecified and ADDR not in LAN) or not any(LAN.subnet_of(net) for net in PRIVATE):
     raise SystemExit('La IP y la subred deben pertenecer a una LAN IPv4 privada.')
 LOCAL_NAME = os.environ.get('LOCAL_NAME')
-PASSWORD = Path(os.environ['TOKEN_FILE']).read_bytes().strip()
+CONFIG = device.load()
+TOKEN_FILE = os.environ.get('TOKEN_FILE')
+PASSWORD = Path(TOKEN_FILE).read_bytes().strip() if TOKEN_FILE else None
+SETUP_FILE = os.environ.get('SETUP_CODE_FILE')
+SETUP_CODE = Path(SETUP_FILE).read_bytes().strip() if SETUP_FILE and CONFIG is None and not PASSWORD else None
+if SETUP_CODE is not None and len(SETUP_CODE) < 24:
+    raise SystemExit('Setup code must contain at least 24 characters.')
 SESSIONS = {}
 AUTH_LOCK = threading.Lock()
 SESSION_AGE = 12 * 60 * 60
@@ -40,6 +50,7 @@ THUMB_FAILURES = OrderedDict()
 THUMB_DIR = VIDEOS / '.miniaturas-panel'
 TRASH = VIDEOS / '.papelera-panel'
 LOGIN = Path(__file__).with_name('login.html').read_text(encoding='utf-8')
+SETUP = Path(__file__).with_name('setup.html').read_text(encoding='utf-8')
 PAGE = Path(__file__).with_name('panel.html').read_text(encoding='utf-8')
 
 
@@ -147,6 +158,8 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
     def reply(self, status, body='', mime='text/plain', cookie=None, location=None):
+        if mime == 'text/plain':
+            body = translate(body, self.language())
         data = body.encode('utf-8')
         self.send_response(status)
         if cookie is not None:
@@ -183,29 +196,106 @@ class Handler(BaseHTTPRequestHandler):
         with AUTH_LOCK:
             return key if SESSIONS.get(key, 0) > time.monotonic() else ''
 
-    def login_page(self, status=200, error=''):
-        message = f'<p class="error" role="alert">{error}</p>' if error else ''
-        self.reply(status, LOGIN.replace('<!-- ERROR -->', message), 'text/html')
+    def language(self):
+        try:
+            cookie = SimpleCookie(self.headers.get('Cookie', ''))
+            value = cookie['desk_language'].value if 'desk_language' in cookie else None
+        except CookieError:
+            value = None
+        return value if value in device.LANGUAGES else (CONFIG or {}).get('language', 'en')
 
-    def login(self):
-        global NEXT_ATTEMPT
+    def page(self, template, status=200, error=''):
+        language = self.language()
+        label = device.name(CONFIG, 'JAVITEN PI3' if PASSWORD else device.DEFAULT_NAME)
+        body = render(template, language)
+        body = body.replace('<!-- ERROR -->', f'<p class="error" role="alert">{html.escape(translate(error, language))}</p>' if error else '')
+        body = body.replace('__DEVICE_NAME__', html.escape(label))
+        self.reply(status, body, 'text/html')
+
+    def login_page(self, status=200, error=''):
+        self.page(LOGIN, status, error)
+
+    def form(self, limit=2048):
         lengths = self.headers.get_all('Content-Length', [])
         if (self.headers.get('Transfer-Encoding') or len(lengths) != 1
                 or not re.fullmatch(r'[0-9]{1,4}', lengths[0])
-                or not 0 < int(lengths[0]) <= 1024
+                or not 0 < int(lengths[0]) <= limit
                 or self.headers.get_content_type() != 'application/x-www-form-urlencoded'):
+            return None
+        fields = urllib.parse.parse_qs(self.rfile.read(int(lengths[0])).decode('utf-8', errors='replace'))
+        return {key: values[0] for key, values in fields.items() if len(values) == 1}
+
+    def first_run(self):
+        global CONFIG, NEXT_ATTEMPT
+        fields = self.form()
+        if fields is None:
+            self.page(SETUP, 400, 'Solicitud inválida.')
+            return
+        label, user = fields.get('name', '').strip(), fields.get('user', '').strip()
+        password = fields.get('password', '')
+        code = fields.get('code', '').encode()
+        with AUTH_LOCK:
+            if CONFIG or PASSWORD or not SETUP_CODE:
+                self.reply(404)
+                return
+            now = time.monotonic()
+            if now < NEXT_ATTEMPT:
+                self.page(SETUP, 429, 'Esperá unos segundos e intentá de nuevo.')
+                return
+            if not hmac.compare_digest(code, SETUP_CODE):
+                NEXT_ATTEMPT = now + 2
+                self.page(SETUP, 403, 'Código de instalación inválido.')
+                return
+            if (not device.valid_name(label) or not re.fullmatch(r'[A-Za-z0-9_.-]{1,64}', user)
+                    or not 12 <= len(password) <= 128 or password != fields.get('confirm')):
+                self.page(SETUP, 400, 'Revisá el nombre, el usuario y la contraseña.')
+                return
+            config = device.credentials(label, user, password.encode(), self.language())
+            try:
+                device.save(config)
+            except OSError:
+                self.page(SETUP, 500, 'No se pudo guardar la configuración.')
+                return
+            CONFIG = config
+        self.reply(303, location='/')
+
+    def rename_device(self):
+        global CONFIG
+        fields = self.form()
+        label = (fields or {}).get('name', '').strip()
+        if not device.valid_name(label):
+            self.page(PAGE, 400, 'Nombre de dispositivo inválido.')
+            return
+        with AUTH_LOCK:
+            config = {**(CONFIG or {}), 'name': label}
+            try:
+                device.save(config)
+            except OSError:
+                self.page(PAGE, 500, 'No se pudo guardar la configuración.')
+                return
+            CONFIG = config
+        self.reply(303, location='/')
+
+    def valid_login(self, user, password):
+        if CONFIG and 'password_hash' in CONFIG:
+            return user == CONFIG['user'] and hmac.compare_digest(
+                device.password_hash(password, bytes.fromhex(CONFIG['salt'])), CONFIG['password_hash'])
+        return PASSWORD is not None and user == 'admin' and hmac.compare_digest(password, PASSWORD)
+
+    def login(self):
+        global NEXT_ATTEMPT
+        fields = self.form()
+        if fields is None:
             self.login_page(400, 'Solicitud de ingreso inválida.')
             return
-        body = self.rfile.read(int(lengths[0])).decode('utf-8', errors='replace')
-        fields = urllib.parse.parse_qs(body)
-        user = fields.get('user', [''])[0]
-        password = fields.get('password', [''])[0].encode()
+        user = fields.get('user', '')
+        password = fields.get('password', '').encode()
         now = time.monotonic()
         key = ''
         with AUTH_LOCK:
             if now < NEXT_ATTEMPT:
                 status, error = 429, 'Esperá unos segundos e intentá de nuevo.'
-            elif user != 'admin' or not hmac.compare_digest(hashlib.sha256(password).digest(), hashlib.sha256(PASSWORD).digest()):
+            elif not self.valid_login(user, password):
                 NEXT_ATTEMPT = now + 2
                 status, error = 401, 'Usuario o contraseña incorrectos.'
             else:
@@ -223,9 +313,14 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.local():
             return
+        if self.path in ('/?lang=en', '/?lang=es'):
+            self.reply(303, cookie=f'desk_language={self.path[-2:]}; Path=/; SameSite=Strict; Max-Age=31536000', location='/')
+            return
         if self.path == '/':
-            if self.session():
-                self.reply(200, PAGE, 'text/html')
+            if not CONFIG and not PASSWORD:
+                self.page(SETUP) if SETUP_CODE else self.reply(503, 'Configurá el código de instalación.')
+            elif self.session():
+                self.page(PAGE)
             else:
                 self.login_page()
             return
@@ -303,6 +398,9 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(409 if result.get('error') else 404,
                        result.get('error', 'El video ya no está en la biblioteca.'))
             return
+        screen = result.get('screen')
+        if screen and screen.get('error'):
+            screen['error'] = translate(screen['error'], self.language())
         self.reply(200, json.dumps(result), 'application/json')
 
     def do_POST(self):
@@ -311,12 +409,18 @@ class Handler(BaseHTTPRequestHandler):
         if self.headers.get_all('Origin') != ['http://' + self.host]:
             self.reply(403, 'Origen inválido.')
             return
+        if self.path == '/setup':
+            self.first_run()
+            return
         if self.path == '/login':
             self.login()
             return
         key = self.session()
         if not key:
             self.reply(401, 'Ingresá para continuar.')
+            return
+        if self.path == '/device':
+            self.rename_device()
             return
         if self.headers.get_all('X-Desk-Screen') != ['1']:
             self.reply(403, 'Solicitud inválida.')

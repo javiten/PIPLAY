@@ -4,7 +4,7 @@ Una pantalla de escritorio que reutiliza una Raspberry Pi para reproducir videos
 
 **Versión del repositorio · v1.0.0**
 
-Primera publicación del código. Reúne la versión instalada y los cambios del panel.
+Primera publicación del código, con asistente inicial y panel bilingüe.
 
 ## Hardware
 
@@ -13,6 +13,9 @@ Primera publicación del código. Reúne la versión instalada y los cambios del
 - microSD para el sistema y la biblioteca MP4. Conexión Wi-Fi para acceder al panel en el puerto 8080.
 
 ## Qué hace
+
+- Ofrece inglés por defecto y permite cambiar a español en el asistente, el ingreso y el panel.
+- El asistente pide un nombre, un usuario web y una contraseña. El nombre se puede cambiar después en el panel y se usa en AirPlay y en la pantalla de arranque. El hostname del sistema se administra por separado.
 
 - Reproduce MP4 mediante FFmpeg y mezcla la cola evitando repetir el último video al volver a barajar. El panel permite reproducir, repetir, poner en cola o saltar videos.
 - Sube archivos al elegirlos, muestra el progreso y comprueba el nombre y el espacio disponible. La biblioteca incluye miniaturas, descarga y papelera.
@@ -31,7 +34,10 @@ Las unidades de ejemplo suponen una cuenta local `admin`, un LCD que ya funciona
 1. Creá `/home/admin/desk-screen/videos` con acceso de escritura para `admin` y copiá los MP4 que quieras reproducir.
 2. Instalá los archivos de `app/` como archivos de root en `/opt/desk-screen-panel/` y las dos unidades de `systemd/` en `/etc/systemd/system/`.
 3. Creá `/etc/desk-screen-panel.conf` con `LAN_CIDR=192.168.1.0/24` ajustado a tu red. Opcionalmente agregá `LOCAL_NAME=rpi3.local` si el nombre resuelve en tu red.
-4. Guardá una contraseña única en `/etc/desk-screen-panel.token` con propietario root y modo 0600. El usuario web es `admin`.
+4. Generá el código de instalación en la Pi con `sudo sh -c 'umask 077; openssl rand -hex 16 > /etc/desk-screen-setup.code'`.
 5. Ejecutá `sudo systemctl daemon-reload` y `sudo systemctl enable --now desk-screen.service desk-screen-panel.service`. Abrí la IP local de la Pi en el puerto 8080.
+6. Consultá el código con `sudo cat /etc/desk-screen-setup.code`. Ingresalo en el asistente y elegí el idioma, el nombre, el usuario web y una contraseña de al menos 12 caracteres. Después de guardar, el código deja de habilitar el asistente. Conservá el archivo para que systemd pueda cargar la unidad de ejemplo.
 
-El panel usa HTTP en la LAN. Mantenelo en una red de confianza. Las unidades son ejemplos de instalación y las rutas deben ajustarse si usás otra cuenta o pantalla.
+El panel usa HTTP en la LAN. Completá el asistente desde una red de confianza. Las unidades son ejemplos de instalación y las rutas deben ajustarse si usás otra cuenta o pantalla. El usuario del asistente es una cuenta web, separada de la cuenta de Linux.
+
+Para conservar un ingreso anterior al actualizar manualmente una instalación existente, el panel sigue admitiendo la configuración `TOKEN_FILE` con el usuario web `admin`. Aplicá los archivos y unidades de manera coordinada.

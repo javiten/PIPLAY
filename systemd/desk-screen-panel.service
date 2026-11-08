@@ -8,8 +8,10 @@ User=admin
 Environment=VIDEO_DIR=/home/admin/desk-screen/videos
 Environment=BIND_IP=0.0.0.0
 EnvironmentFile=/etc/desk-screen-panel.conf
-Environment=TOKEN_FILE=%d/desk-screen-panel.token
-LoadCredential=desk-screen-panel.token:/etc/desk-screen-panel.token
+Environment=SETUP_CODE_FILE=%d/desk-screen-setup.code
+LoadCredential=desk-screen-setup.code:/etc/desk-screen-setup.code
+StateDirectory=desk-screen-panel
+StateDirectoryMode=0700
 ExecStart=/usr/bin/python3 /opt/desk-screen-panel/panel.py
 Restart=on-failure
 RestartSec=10
